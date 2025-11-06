@@ -25,6 +25,7 @@ const navItems = [
   { title: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { title: 'Customers', href: '/admin/customers', icon: Users },
    { title: 'Drivers', href: '/admin/drivers', icon: Users },
+   { title: 'Orders', href: '/admin/orders', icon: Users },
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {

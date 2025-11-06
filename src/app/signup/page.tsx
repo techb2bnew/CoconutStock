@@ -118,19 +118,31 @@ export default function SignupPage() {
     <div className="min-h-screen w-full bg-gradient-to-b from-[#f7fbff] to-[#eef4fb] flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-[460px] rounded-2xl bg-white shadow-[0_20px_60px_rgba(16,24,40,0.08)] border border-slate-100 p-8">
         {/* Brand */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="relative h-12 w-12 rounded-full ring-4 ring-sky-100 overflow-hidden">
-            <Image src="/assests/logos/coconut.png" alt="Brand" fill className="object-contain p-2" />
-          </div>
-          <div>
-            <p className="text-slate-900 font-semibold leading-tight">Coconut Admin</p>
-            <p className="text-[12px] text-slate-500 leading-none">Multi-Location System</p>
-          </div>
-        </div>
+        <div className="flex items-center gap-4 mb-6">
+                      {/* Image */}
+                      <div className="flex items-center justify-center rounded-full ring-4 ring-sky-100 overflow-hidden bg-white">
+                        <Image
+                          src="/assests/logos/coconut.png"
+                          alt="Brand"
+                          width={100}
+                          height={100}
+                          className="object-contain p-2"
+                        />
+                      </div>
+        
+                      {/* Text */}
+                      <div className="flex flex-col justify-center">
+                        <p className="text-sky-500 font-semibold leading-tight">Coconut Admin</p>
+                        <p className="text-[12px] text-slate-500 leading-none">
+                          Multi-Location System
+                        </p>
+                      </div>
+                    </div>
+        
 
         {/* Title */}
         <div className="mb-6 text-center">
-          <h2 className="text-2xl font-bold text-slate-900">Create Your Account</h2>
+          <h2 className="text-2xl font-bold text-sky-500">Create Your Account</h2>
           <p className="text-sm text-slate-600 mt-1">
             Sign up to access your admin dashboard
           </p>

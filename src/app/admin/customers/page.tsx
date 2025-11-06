@@ -12,7 +12,6 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select'
 import { Plus, Edit, Trash2 } from 'lucide-react'
-import Image from 'next/image'
 
 interface Customer {
   id: string
@@ -42,45 +41,35 @@ export default function CustomersPage() {
   const [driverMap, setDriverMap] = useState<Map<string, string>>(new Map())
   const [open, setOpen] = useState(false)
   const [editCustomer, setEditCustomer] = useState<Customer | null>(null)
+  const [errors, setErrors] = useState<Record<string, string>>({})
+
   const [form, setForm] = useState<any>({
     company: '', firstName: '', lastName: '', email: '',
     phone: '', address: '', industry: '', deliveryZone: '',
     customPriceUnit: '', companyLogo: ''
   })
 
-  const updateForm = (key: string, value: any) => setForm((p: any) => ({ ...p, [key]: value }))
+  const updateForm = (key: string, value: any) => {
+    setForm((p: any) => ({ ...p, [key]: value }))
+    setErrors((prev) => ({ ...prev, [key]: '' })) // remove error when typing
+  }
 
   useEffect(() => {
     fetchData()
   }, [])
 
   const fetchData = async () => {
-    // 1️⃣ Fetch all customers
     const { data: customersData, error: custErr } = await supabase.from('customers').select('*')
-    if (custErr) {
-      console.error('Customer fetch error:', custErr)
-      return
-    }
+    if (custErr) return console.error('Customer fetch error:', custErr)
 
-    // 🔹 Prepare driver map
+    const { data: driverData, error: driverErr } = await supabase.from('drivers').select('id, zone')
+    if (driverErr) console.error('Driver fetch error:', driverErr)
+
     const newDriverMap = new Map<string, string>()
+    driverData?.forEach((d) => newDriverMap.set(String(d.id), d.zone || '—'))
+    setDrivers(driverData || [])
+    setDriverMap(newDriverMap)
 
-    // 2️⃣ Fetch all drivers
-    const { data: driverData, error: driverErr } = await supabase
-      .from('drivers')
-      .select('id, zone')
-
-    if (driverErr) {
-      console.error('Driver fetch error:', driverErr)
-    } else {
-      console.log("🔹 Raw drivers data:", driverData)
-      setDrivers(driverData || [])
-      driverData?.forEach((d) => newDriverMap.set(String(d.id), d.zone || '—'))
-      setDriverMap(newDriverMap)
-      console.log("🔹 DriverMap:", Array.from(newDriverMap.entries()))
-    }
-
-    // 3️⃣ Attach driver zone + order stats
     const customersWithOrders = await Promise.all(
       (customersData || []).map(async (cust) => {
         const { data: orders } = await supabase
@@ -110,9 +99,29 @@ export default function CustomersPage() {
       customPriceUnit: '', companyLogo: ''
     })
     setEditCustomer(null)
+    setErrors({})
+  }
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {}
+
+    if (!form.company.trim()) newErrors.company = 'Company name is required'
+    if (!form.firstName.trim()) newErrors.firstName = 'First name is required'
+    if (!form.email.trim()) newErrors.email = 'Email is required'
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email))
+      newErrors.email = 'Invalid email format'
+
+    if (!form.phone.trim()) newErrors.phone = 'Phone number is required'
+    if (!form.address.trim()) newErrors.address = 'Address is required'
+    if (!form.deliveryZone) newErrors.deliveryZone = 'Delivery zone is required'
+
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
   }
 
   const handleSave = async () => {
+    if (!validateForm()) return
+
     const data = {
       company_name: form.company,
       first_name: form.firstName,
@@ -148,8 +157,7 @@ export default function CustomersPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this customer?')) return
     const { error } = await supabase.from('customers').delete().eq('id', id)
-    if (error) console.error(error)
-    else fetchData()
+    if (!error) fetchData()
   }
 
   const handleEdit = (cust: Customer) => {
@@ -169,26 +177,22 @@ export default function CustomersPage() {
     setOpen(true)
   }
 
-  const handleFileChange = async (files: FileList | null) => {
-    if (!files || !files[0]) return
-    const file = files[0]
-    const { data, error } = await supabase.storage
-      .from('logos')
-      .upload(`customer-logos/${Date.now()}-${file.name}`, file)
-    if (!error && data) {
-      const publicUrl = supabase.storage.from('logos').getPublicUrl(data.path).data.publicUrl
-      updateForm('companyLogo', publicUrl)
-    }
-  }
-
   return (
     <div className="p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Customers</h1>
+      <div className="flex flex-col gap-1">
+        <h1 className="text-2xl font-semibold text-slate-800">Customer Management</h1>
+        <p className="text-sm text-slate-500">CoconutStock HQ - Primary Store</p>
+      </div>
+
+      <div className="flex justify-between items-center">
+        
+        <div className="relative w-1/3">
+          <Input placeholder="🔍 Search customers..." className="rounded-lg bg-white border border-slate-200 shadow-sm focus:ring-2 focus:ring-blue-200" />
+        </div>
 
         <Dialog open={open} onOpenChange={(o) => { setOpen(o); if (!o) resetForm() }}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="rounded-lg bg-[#00a1ff] hover:bg-[#0090e6] text-white text-base font-semibold">
               <Plus className="mr-2 h-4 w-4" /> {editCustomer ? 'Edit Customer' : 'Add New Customer'}
             </Button>
           </DialogTrigger>
@@ -205,16 +209,19 @@ export default function CustomersPage() {
 
             {/* Form Body */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
+              {/* Left side */}
               <div className="space-y-3">
                 <div>
-                  <Label>Company Name</Label>
+                  <Label>Company Name *</Label>
                   <Input value={form.company} onChange={(e) => updateForm('company', e.target.value)} />
+                  {errors.company && <p className="text-red-500 text-xs mt-1">{errors.company}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label>First Name</Label>
+                    <Label>First Name *</Label>
                     <Input value={form.firstName} onChange={(e) => updateForm('firstName', e.target.value)} />
+                    {errors.firstName && <p className="text-red-500 text-xs mt-1">{errors.firstName}</p>}
                   </div>
                   <div>
                     <Label>Last Name</Label>
@@ -223,28 +230,30 @@ export default function CustomersPage() {
                 </div>
 
                 <div>
-                  <Label>Phone</Label>
+                  <Label>Phone *</Label>
                   <Input value={form.phone} onChange={(e) => updateForm('phone', e.target.value)} />
+                  {errors.phone && <p className="text-red-500 text-xs mt-1">{errors.phone}</p>}
                 </div>
 
                 <div>
-                  <Label>Address</Label>
+                  <Label>Address *</Label>
                   <Textarea value={form.address} onChange={(e) => updateForm('address', e.target.value)} />
+                  {errors.address && <p className="text-red-500 text-xs mt-1">{errors.address}</p>}
                 </div>
               </div>
 
+              {/* Right side */}
               <div className="space-y-3">
                 <div>
-                  <Label>Email</Label>
+                  <Label>Email *</Label>
                   <Input value={form.email} onChange={(e) => updateForm('email', e.target.value)} />
+                  {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
                 </div>
 
                 <div>
-                  <Label>Delivery Zone</Label>
+                  <Label>Delivery Zone *</Label>
                   <Select onValueChange={(v) => updateForm('deliveryZone', v)} value={String(form.deliveryZone)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select zone" />
-                    </SelectTrigger>
+                    <SelectTrigger><SelectValue placeholder="Select zone" /></SelectTrigger>
                     <SelectContent>
                       {drivers.map((d) => (
                         <SelectItem key={d.id} value={String(d.id)}>
@@ -253,15 +262,8 @@ export default function CustomersPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                  {errors.deliveryZone && <p className="text-red-500 text-xs mt-1">{errors.deliveryZone}</p>}
                 </div>
-
-                {/* <div>
-                  <Label>Company Logo</Label>
-                  <input type="file" accept="image/png, image/jpeg" onChange={(e) => handleFileChange(e.target.files)} />
-                  {form.companyLogo && (
-                    <Image src={form.companyLogo} alt="Logo" width={60} height={60} className="mt-2 rounded-md" />
-                  )}
-                </div> */}
 
                 <div>
                   <Label>Custom Price per Unit</Label>
@@ -275,7 +277,7 @@ export default function CustomersPage() {
               </div>
             </div>
 
-            <DialogFooter className="mt-4 flex items-center justify-end gap-2">
+            <DialogFooter className="mt-4 flex justify-end gap-2">
               <DialogClose asChild>
                 <Button variant="ghost">Cancel</Button>
               </DialogClose>
@@ -304,20 +306,22 @@ export default function CustomersPage() {
           <tbody>
             {customers.map((cust) => (
               <tr key={cust.id} className="border-b hover:bg-slate-50">
+                
                 <td className="p-3 font-medium">{cust.company_name}</td>
-                <td className="p-3">{cust.first_name} {cust.last_name}</td>
+                 <td className="px-6 py-3">
+                  <div className="font-medium text-gray-800">{cust.first_name} {cust.last_name}</div>
+                  <div className="text-xs text-gray-500">{cust.phone}</div>
+                </td>
+                
                 <td className="p-3">{cust.email}</td>
                 <td className="p-3">{cust.phone}</td>
                 <td className="p-3">{cust.delivery_zone || '—'}</td>
                 <td className="p-3">{cust.total_orders ?? 0}</td>
                 <td className="p-3">{cust.last_order || '—'}</td>
                 <td className="p-3">
-                  <span
-                    className={`px-2 py-1 rounded text-xs ${cust.status === 'active'
-                      ? 'bg-green-100 text-green-700'
-                      : 'bg-slate-100 text-slate-600'
-                      }`}
-                  >
+                  <span className={`px-2 py-1 rounded text-xs ${cust.status === 'active'
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-slate-100 text-slate-600'}`}>
                     {cust.status}
                   </span>
                 </td>
@@ -334,7 +338,6 @@ export default function CustomersPage() {
           </tbody>
         </table>
 
-        {/* Always show even when empty */}
         {customers.length === 0 && (
           <div className="text-center text-slate-500 py-6 border-t">No customers found.</div>
         )}

@@ -62,7 +62,7 @@ function MetricCard({
   return (
     <Card
       className={
-        "border-none shadow-sm transition hover:shadow-md " +
+        "border-none shadow-sm transition-all duration-300 ease-in-out hover:-translate-y-1 hover:shadow-lg " +
         (accent
           ? `bg-gradient-to-b ${accent}`
           : "bg-card")
@@ -76,6 +76,7 @@ function MetricCard({
           <Icon className="h-4 w-4 text-muted-foreground" />
         </div>
       </CardHeader>
+
       <CardContent className="flex items-end justify-between">
         <div className="text-3xl font-semibold tracking-tight">{value}</div>
         {trend ? <Trend value={trend} /> : null}
@@ -83,6 +84,7 @@ function MetricCard({
     </Card>
   );
 }
+
 
 // ---------- Demo datasets ----------
 const sales = [
@@ -138,28 +140,28 @@ function SectionHeader({
   );
 }
 
-function SalesMiniChart() {
-  return (
-    <Card className="h-full">
-      <CardHeader className="pb-2">
-        <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-          <LineChartIcon className="h-4 w-4" /> Monthly Revenue
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="h-48">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={sales} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 12 }} />
-            <Tooltip cursor={{ strokeDasharray: "3 3" }} />
-            <Line type="monotone" dataKey="value" strokeWidth={2} dot={false} />
-          </LineChart>
-        </ResponsiveContainer>
-      </CardContent>
-    </Card>
-  );
-}
+// function SalesMiniChart() {
+//   return (
+//     <Card className="h-full">
+//       <CardHeader className="pb-2">
+//         <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+//           <LineChartIcon className="h-4 w-4" /> Monthly Revenue
+//         </CardTitle>
+//       </CardHeader>
+//       <CardContent className="h-48">
+//         <ResponsiveContainer width="100%" height="100%">
+//           <LineChart data={sales} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+//             <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+//             <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+//             <YAxis tick={{ fontSize: 12 }} />
+//             <Tooltip cursor={{ strokeDasharray: "3 3" }} />
+//             <Line type="monotone" dataKey="value" strokeWidth={2} dot={false} />
+//           </LineChart>
+//         </ResponsiveContainer>
+//       </CardContent>
+//     </Card>
+//   );
+// }
 
 function RecentOrdersList() {
   return (
@@ -169,16 +171,21 @@ function RecentOrdersList() {
           My Recent Orders
         </CardTitle>
       </CardHeader>
+
       <CardContent className="flex flex-col gap-3">
         {recentOrders.map((o, idx) => (
           <div
             key={o.id}
-            className="flex items-center justify-between rounded-xl border bg-card p-3"
+            className="
+              flex items-center justify-between rounded-xl border bg-card p-3
+              transition-all duration-300 hover:-translate-y-1 hover:shadow-md
+            "
           >
             <div className="flex items-center gap-3">
               <Badge variant="secondary" className="h-6 w-6 items-center justify-center p-0">
                 {idx + 1}
               </Badge>
+
               <div>
                 <div className="font-medium">Order #{o.id}</div>
                 <p className="text-xs text-muted-foreground">
@@ -186,12 +193,31 @@ function RecentOrdersList() {
                 </p>
               </div>
             </div>
+
             <div className="flex items-center gap-4">
               <div className="text-right">
                 <div className="text-sm font-semibold">${o.amount.toFixed(2)}</div>
-                <p className="text-xs text-muted-foreground">{o.status}</p>
+
+                {/* ✅ Status badge colors based on status */}
+                <p
+                  className={`
+                    text-xs px-2 py-0.5 rounded-md inline-block font-medium
+                    ${
+                      o.status === "Pending"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : o.status === "Paid"
+                        ? "bg-green-100 text-green-800"
+                        : "text-muted-foreground"
+                    }
+                  `}
+                >
+                  {o.status}
+                </p>
               </div>
-              <Button size="sm" variant="secondary">View</Button>
+
+              <Button size="sm" variant="secondary">
+                View
+              </Button>
             </div>
           </div>
         ))}
@@ -200,19 +226,24 @@ function RecentOrdersList() {
   );
 }
 
+
+
+
 // ---------- Main Page ----------
 export default function DashboardPage() {
   return (
     <div className="space-y-6">
       {/* Top Heading */}
-      <Card className="border-none bg-gradient-to-b from-muted/30 to-background p-4 shadow-sm">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Super Admin Dashboard</h1>
-          <p className="text-sm text-muted-foreground">
-            Welcome back, <span className="font-medium">Super Admin</span>
-          </p>
-        </div>
-      </Card>
+     <Card className="bg-white border-none p-6 shadow-lg rounded-lg hover:shadow-xl transition-shadow duration-300 ease-in-out">
+  <div className="flex flex-col gap-2">
+    <h1 className="text-3xl font-semibold text-sky-500">Super Admin Dashboard</h1>
+    <p className="text-sm text-gray-500">
+      Welcome back, <span className="font-medium text-sky-500">Super Admin</span>
+    </p>
+  </div>
+</Card>
+
+
 
       {/* Primary Store */}
       <div className="space-y-3">
@@ -294,22 +325,17 @@ export default function DashboardPage() {
       </div>
 
       {/* Charts + Recent Orders */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <div className="lg:col-span-4">
-          <SalesMiniChart />
-        </div>
-        <div className="lg:col-span-3">
+      <div className="w-full">
           <RecentOrdersList />
-        </div>
       </div>
 
       {/* Bottom KPI strip (optional) */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      {/* <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <MetricCard title="Active Now" value={573} icon={Activity} trend={"+201"} />
         <MetricCard title="Open Tickets" value={23} icon={Package} trend={"-4%"} />
         <MetricCard title="Fulfillment SLA" value="98.4%" icon={Clock} trend={"+1.1%"} />
         <MetricCard title="M/M Growth" value="21%" icon={LineChartIcon} trend={"+3%"} />
-      </div>
+      </div> */}
     </div>
   );
 }

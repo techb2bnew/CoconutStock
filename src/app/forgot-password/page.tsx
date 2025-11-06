@@ -44,6 +44,9 @@ export default function ForgotPasswordPage() {
       }
 
       setSuccessMessage('OTP has been sent to your email!')
+      setTimeout(() => {
+        router.push('/reset-password')
+      }, 1500)
     } catch (err) {
       console.error('Forgot password error:', err)
       setErrors({ email: 'Something went wrong. Please try again.' })

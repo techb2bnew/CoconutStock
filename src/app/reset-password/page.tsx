@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { supabase } from '@/lib/supabaseClient'
+import Link from 'next/link'
 
 export default function ResetPasswordPage() {
   const [newPassword, setNewPassword] = useState('')
@@ -112,6 +113,12 @@ export default function ResetPasswordPage() {
             {isLoading ? 'Updating…' : 'Reset Password'}
           </Button>
         </form>
+        <div className="mt-4 text-center text-sm">
+          Remembered your password?{' '}
+          <Link href="/login" className="underline text-sky-600 hover:text-sky-700">
+            Login
+          </Link>
+        </div>
       </div>
     </div>
   )

@@ -103,45 +103,52 @@ export default function DriverManagementPage() {
     setOpen(true)
   }
 
-  async function handleSave(e?: React.SyntheticEvent) {
-    if (e) e.preventDefault()
-    setSaving(true)
-    try {
-      const payload = {
-        driver_name: form.driver_name,
-        phone_number: form.phone_number || null,
-        email: form.email || null,
-        vehicle_id: form.vehicle_id || null,
-        zone: form.zone || null,
-        // Save time as HH:MM:SS (Postgres time) so append :00 if missing seconds
-        shift_start: form.shift_start?.length === 5 ? `${form.shift_start}:00` : form.shift_start,
-        shift_end: form.shift_end?.length === 5 ? `${form.shift_end}:00` : form.shift_end,
-        capacity: form.capacity ? Number(form.capacity) : null,
-        status: form.status || 'Available',
-      }
+async function handleSave(e?: React.SyntheticEvent) {
+  if (e) e.preventDefault()
 
-      if (editing) {
-        const { error } = await supabase
-          .from('drivers')
-          .update(payload)
-          .eq('id', editing.id)
-        if (error) throw error
-      } else {
-        const { error } = await supabase
-          .from('drivers')
-          .insert([payload])
-        if (error) throw error
-      }
-
-      setOpen(false)
-      await fetchDrivers()
-    } catch (err) {
-      console.error('Save driver error:', err)
-      alert('Could not save driver. Check console for details.')
-    } finally {
-      setSaving(false)
-    }
+  // Validation: required fields
+  if (!form.driver_name.trim()) {
+    alert('Driver Name is required')
+    return
   }
+
+  setSaving(true)
+  try {
+    const payload = {
+      driver_name: form.driver_name,
+      phone_number: form.phone_number || null,
+      email: form.email || null,
+      vehicle_id: form.vehicle_id || null,
+      zone: form.zone || null,
+      shift_start: form.shift_start?.length === 5 ? `${form.shift_start}:00` : form.shift_start,
+      shift_end: form.shift_end?.length === 5 ? `${form.shift_end}:00` : form.shift_end,
+      capacity: form.capacity ? Number(form.capacity) : null,
+      status: form.status || 'Available',
+    }
+
+    if (editing) {
+      const { error } = await supabase
+        .from('drivers')
+        .update(payload)
+        .eq('id', editing.id)
+      if (error) throw error
+    } else {
+      const { error } = await supabase
+        .from('drivers')
+        .insert([payload])
+      if (error) throw error
+    }
+
+    setOpen(false)
+    await fetchDrivers()
+  } catch (err) {
+    console.error('Save driver error:', err)
+    alert('Could not save driver. Check console for details.')
+  } finally {
+    setSaving(false)
+  }
+}
+
 
   async function handleDelete(id?: number) {
     if (!id) return
@@ -333,13 +340,13 @@ export default function DriverManagementPage() {
                       onClick={() => openEditModal(d)}
                       className="text-sky-600 hover:underline text-sm font-medium inline-flex items-center gap-2"
                     >
-                      <Edit className="h-4 w-4" /> Edit
+                      <Edit className="h-4 w-4" /> 
                     </button>
                     <button
                       onClick={() => handleDelete(d.id)}
                       className="text-rose-600 hover:underline text-sm font-medium inline-flex items-center gap-2"
                     >
-                      <Trash2 className="h-4 w-4" /> Delete
+                      <Trash2 className="h-4 w-4" /> 
                     </button>
                   </div>
                 </td>
@@ -426,7 +433,7 @@ export default function DriverManagementPage() {
 
               <div className="flex justify-end gap-3 mt-4">
                 <button type="button" onClick={() => { setOpen(false); setEditing(null) }} className="px-4 py-2 rounded-md border border-gray-300 text-gray-700 text-sm hover:bg-gray-100">Cancel</button>
-                <button type="submit" disabled={saving} className="px-4 py-2 rounded-md bg-sky-600 hover:bg-sky-700 text-white text-sm font-medium shadow">
+                <button type="submit" disabled={saving} className="px-4 py-2 rounded-lg bg-[#00a1ff] hover:bg-[#0090e6] text-white text-base font-semibold">
                   {saving ? 'Saving…' : editing ? 'Update Driver' : 'Add Driver'}
                 </button>
               </div>

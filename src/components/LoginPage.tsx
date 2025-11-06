@@ -7,7 +7,6 @@ import { Eye, EyeOff } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
-
 import { supabase } from '@/lib/supabaseClient'
 import Link from 'next/link'
 import { useAppDispatch } from '../../redux/hooks'
@@ -32,24 +31,38 @@ export default function LoginPage({ onStepChange, onAuthSuccess }: LoginScreenPr
   const dispatch = useAppDispatch()
   const router = useRouter()
 
+  // Frontend validation function
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
-    if (!email.trim()) newErrors.email = 'Email is required'
-    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = 'Please enter valid email'
-    if (!password.trim()) newErrors.password = 'Password is required'
+
+    if (!email.trim()) {
+      newErrors.email = 'Email is required'
+    } else if (!/^\S+@\S+\.\S+$/.test(email)) {
+      newErrors.email = 'Please enter a valid email'
+    }
+
+    if (!password.trim()) {
+      newErrors.password = 'Password is required'
+    }
+
     setErrors(newErrors)
+
+    // Return true if no errors
     return Object.keys(newErrors).length === 0
   }
 
   const handleSignIn = async () => {
-    // if (!validateForm()) return
+    if (!validateForm()) return // Don't continue if validation fails
+
     setIsLoading(true)
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
       if (error) {
+        // Show error on email field (or you can customize)
         setErrors({ email: error.message })
+        setIsLoading(false)
         return
       }
 
@@ -57,13 +70,11 @@ export default function LoginPage({ onStepChange, onAuthSuccess }: LoginScreenPr
         const authData = {
           user: data.user,
           token: data.session.access_token,
-          // expires: data.session.expires_at * 1000,
         }
 
         localStorage.setItem('coconut_auth', JSON.stringify(authData))
         document.cookie = `auth-token=${data.session.access_token}; path=/; max-age=604800; SameSite=Lax`
 
-        // dispatch(loginSuccess({ user: authData.user, token: authData.token }))
         window.dispatchEvent(new CustomEvent('userLoggedIn'))
 
         router.push('/admin/dashboard')
@@ -84,19 +95,32 @@ export default function LoginPage({ onStepChange, onAuthSuccess }: LoginScreenPr
     <div className="min-h-screen w-full bg-gradient-to-b from-[#f7fbff] to-[#eef4fb] flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-[460px] rounded-2xl bg-white shadow-[0_20px_60px_rgba(16,24,40,0.08)] border border-slate-100 p-8">
         {/* Brand */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="relative h-12 w-12 rounded-full ring-4 ring-sky-100 overflow-hidden">
-            <Image src="/assests/logos/coconut.png" alt="Brand" fill className="object-contain p-2" />
-          </div>
-          <div>
-            <p className="text-slate-900 font-semibold leading-tight">Coconut Admin</p>
-            <p className="text-[12px] text-slate-500 leading-none">Multi-Location System</p>
-          </div>
-        </div>
+                    <div className="flex items-center gap-4 mb-6">
+              {/* Image */}
+              <div className="flex items-center justify-center rounded-full ring-4 ring-sky-100 overflow-hidden bg-white">
+                <Image
+                  src="/assests/logos/coconut.png"
+                  alt="Brand"
+                  width={100}
+                  height={100}
+                  className="object-contain p-2"
+                />
+              </div>
+
+              {/* Text */}
+              <div className="flex flex-col justify-center">
+                <p className="text-sky-500 font-semibold leading-tight">Coconut Admin</p>
+                <p className="text-[12px] text-slate-500 leading-none">
+                  Multi-Location System
+                </p>
+              </div>
+            </div>
+
+
 
         {/* Title */}
         <div className="mb-6 text-center">
-          <h2 className="text-2xl font-bold text-slate-900">Welcome Back</h2>
+          <h2 className="text-2xl font-bold text-sky-500">Welcome Back</h2>
           <p className="text-sm text-slate-600 mt-1">
             Sign in to access your admin dashboard
           </p>
@@ -104,7 +128,6 @@ export default function LoginPage({ onStepChange, onAuthSuccess }: LoginScreenPr
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-5">
-          
           {/* Email */}
           <div>
             <label className="mb-1.5 block text-sm font-medium text-slate-700">
@@ -124,7 +147,7 @@ export default function LoginPage({ onStepChange, onAuthSuccess }: LoginScreenPr
                   : 'border-slate-300'
               }`}
             />
-            {errors.email && <p className="mt-1 text-xs text-rose-600">{errors.email}</p>}
+            
           </div>
 
           {/* Password */}
@@ -147,6 +170,7 @@ export default function LoginPage({ onStepChange, onAuthSuccess }: LoginScreenPr
                     : 'border-slate-300'
                 }`}
               />
+              {errors.email && <p className="mt-1 text-xs text-rose-600">{errors.email}</p>}
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -160,14 +184,14 @@ export default function LoginPage({ onStepChange, onAuthSuccess }: LoginScreenPr
           </div>
 
           {/* Forgot Password */}
-                  <div className="flex items-center justify-end">
-          <Link
-            href="/forgot-password"
-            className="text-sm font-medium text-sky-600 hover:text-sky-700 underline underline-offset-2"
-          >
-            Forgot Password?
-          </Link>
-        </div>
+          <div className="flex items-center justify-end">
+            <Link
+              href="/forgot-password"
+              className="text-sm font-medium text-sky-600 hover:text-sky-700 underline underline-offset-2"
+            >
+              Forgot Password?
+            </Link>
+          </div>
 
           {/* Submit */}
           <Button
@@ -178,12 +202,12 @@ export default function LoginPage({ onStepChange, onAuthSuccess }: LoginScreenPr
             {isLoading ? 'Signing in…' : 'Sign In'}
           </Button>
         </form>
-         <div className="mt-4 text-center text-sm">
-        Don't have an account?{" "}
-        <Link href="/signup" className="underline">
-          Signup
-        </Link>
-      </div>
+        <div className="mt-4 text-center text-sm">
+          Don't have an account?{' '}
+          <Link href="/signup" className="underline">
+            Signup
+          </Link>
+        </div>
       </div>
     </div>
   )
