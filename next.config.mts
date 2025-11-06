@@ -1,9 +1,10 @@
+// next.config.mjs
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ["images.unsplash.com"], // allow Unsplash
+    domains: ["images.unsplash.com"],
   },
 };
 
-module.exports = nextConfig;
+export default nextConfig;
