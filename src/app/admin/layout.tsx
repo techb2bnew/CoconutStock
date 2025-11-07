@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { 
-  LayoutDashboard, Users, Truck, ShoppingCart, 
+import {
+  LayoutDashboard, Users, Truck, ShoppingCart,
   UsersRound, LogOut, Search
 } from "lucide-react";
 
@@ -27,9 +27,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    localStorage.removeItem('coconut_auth'); 
-    document.cookie = 'auth-token=; path=/; max-age=0'; 
-    router.push('/login'); 
+    localStorage.removeItem('coconut_auth');
+    document.cookie = 'auth-token=; path=/; max-age=0';
+    router.push('/login');
   };
 
   return (
@@ -37,17 +37,25 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r flex flex-col fixed left-0 top-0 h-full shadow-sm">
         {/* Logo Section */}
-        <div className="flex items-center gap-2 p-4 border-b">
-          <div className="bg-blue-100 p-2 rounded-md">
-           <Image
-                         src="/assests/logos/coconut.png"
-                         alt="Brand"
-                         width={100}
-                         height={100}
-                         className="object-contain p-2"
-                       />
+        <div className="flex items-center gap-4 mb-6 mt-4 p-5">
+          {/* Image */}
+          <div className="flex items-center justify-center rounded-full ring-4 ring-sky-100 overflow-hidden bg-white">
+            <Image
+              src="/assests/logos/coconut.png"
+              alt="Brand"
+              width={70}
+              height={70}
+              className="object-contain p-2"
+            />
           </div>
-          <h1 className="text-lg font-semibold text-sky-400">CoconutStock</h1>
+
+          {/* Text */}
+          <div className="flex flex-col justify-center">
+            <p className="text-sky-500 font-semibold leading-tight">Coconut Admin</p>
+            <p className="text-[12px] text-slate-500 leading-none">
+              Multi-Location System
+            </p>
+          </div>
         </div>
 
         {/* Menu Items */}
@@ -58,11 +66,10 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             return (
               <Link key={item.title} href={item.href}>
                 <div
-                  className={`flex items-center gap-3 px-5 py-3 mx-2 rounded-md cursor-pointer transition-colors ${
-                    isActive
+                  className={`flex items-center gap-3 px-5 py-3 mx-2 rounded-md cursor-pointer transition-colors ${isActive
                       ? 'bg-sky-400 text-white'
                       : 'text-gray-700 hover:bg-blue-100 hover:text-sky-400'
-                  }`}
+                    }`}
                 >
                   <Icon className="h-5 w-5" />
                   <span className="font-medium text-sm">{item.title}</span>
