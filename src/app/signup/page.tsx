@@ -42,7 +42,7 @@ export default function SignupPage() {
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {}
 
-    if (!name.trim()) newErrors.name = 'Full name is required'
+    if (!name.trim()) newErrors.name = 'Name is required'
 
     if (!email.trim()) newErrors.email = 'Email is required'
     else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = 'Please enter a valid email'
@@ -58,55 +58,55 @@ export default function SignupPage() {
     return Object.keys(newErrors).length === 0
   }
 
- const handleSignUp = async () => {
-  if (!validateForm()) return;
-  setIsLoading(true);
+  const handleSignUp = async () => {
+    if (!validateForm()) return;
+    setIsLoading(true);
 
-  try {
- 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-        data: {
-          name,
-          role,
+    try {
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          data: {
+            name,
+            role,
+          },
         },
-      },
-    });
+      });
 
-    if (error) {
-      setErrors({ email: error.message });
-      return;
-    }
-
-    const user = data.user;
-
-    if (user) {
-      const { error: insertError } = await supabase.from('users').insert([
-        {
-          id: user.id,       
-          name: name,
-          email: email,
-          role: role,
-          created_at: new Date(),
-        },
-      ]);
-
-      if (insertError) {
-        console.error('Error inserting user profile:', insertError.message);
+      if (error) {
+        setErrors({ email: error.message });
+        return;
       }
 
+      const user = data.user;
 
-      router.push('/login?signup=success');
+      if (user) {
+        const { error: insertError } = await supabase.from('users').insert([
+          {
+            id: user.id,
+            name: name,
+            email: email,
+            role: role,
+            created_at: new Date(),
+          },
+        ]);
+
+        if (insertError) {
+          console.error('Error inserting user profile:', insertError.message);
+        }
+
+
+        router.push('/login?signup=success');
+      }
+    } catch (err) {
+      console.error('Signup error:', err);
+    } finally {
+      setIsLoading(false);
     }
-  } catch (err) {
-    console.error('Signup error:', err);
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -119,26 +119,26 @@ export default function SignupPage() {
       <div className="w-full max-w-[460px] rounded-2xl bg-white shadow-[0_20px_60px_rgba(16,24,40,0.08)] border border-slate-100 p-8">
         {/* Brand */}
         <div className="flex items-center gap-4 mb-6">
-                      {/* Image */}
-                      <div className="flex items-center justify-center rounded-full ring-4 ring-sky-100 overflow-hidden bg-white">
-                        <Image
-                          src="/assests/logos/coconut.png"
-                          alt="Brand"
-                          width={100}
-                          height={100}
-                          className="object-contain p-2"
-                        />
-                      </div>
-        
-                      {/* Text */}
-                      <div className="flex flex-col justify-center">
-                        <p className="text-sky-500 font-semibold leading-tight">Coconut Admin</p>
-                        <p className="text-[12px] text-slate-500 leading-none">
-                          Multi-Location System
-                        </p>
-                      </div>
-                    </div>
-        
+          {/* Image */}
+          <div className="flex items-center justify-center rounded-full ring-4 ring-sky-100 overflow-hidden bg-white">
+            <Image
+              src="/assests/logos/coconut.png"
+              alt="Brand"
+              width={100}
+              height={100}
+              className="object-contain p-2"
+            />
+          </div>
+
+          {/* Text */}
+          <div className="flex flex-col justify-center">
+            <p className="text-sky-500 font-semibold leading-tight">Coconut Admin</p>
+            <p className="text-[12px] text-slate-500 leading-none">
+              Multi-Location System
+            </p>
+          </div>
+        </div>
+
 
         {/* Title */}
         <div className="mb-6 text-center">
@@ -163,11 +163,10 @@ export default function SignupPage() {
                 if (errors.name) setErrors((prev) => ({ ...prev, name: undefined }))
               }}
               placeholder="Enter ur name "
-              className={`h-12 rounded-lg border focus-visible:ring-2 focus-visible:ring-sky-200 focus-visible:border-sky-500 ${
-                errors.name
-                  ? 'border-rose-400 bg-rose-50 text-rose-700 placeholder:text-rose-400'
+              className={`h-12 rounded-lg border focus-visible:ring-2 focus-visible:ring-sky-200 focus-visible:border-sky-500 ${errors.name
+                  ? ''
                   : 'border-slate-300'
-              }`}
+                }`}
             />
             {errors.name && <p className="mt-1 text-xs text-rose-600">{errors.name}</p>}
           </div>
@@ -185,11 +184,10 @@ export default function SignupPage() {
                 if (errors.email) setErrors((prev) => ({ ...prev, email: undefined }))
               }}
               placeholder="Enter ur email"
-              className={`h-12 rounded-lg border focus-visible:ring-2 focus-visible:ring-sky-200 focus-visible:border-sky-500 ${
-                errors.email
-                  ? 'border-rose-400 bg-rose-50 text-rose-700 placeholder:text-rose-400'
+              className={`h-12 rounded-lg border focus-visible:ring-2 focus-visible:ring-sky-200 focus-visible:border-sky-500 ${errors.email
+                  ? ''
                   : 'border-slate-300'
-              }`}
+                }`}
             />
             {errors.email && <p className="mt-1 text-xs text-rose-600">{errors.email}</p>}
           </div>
@@ -205,11 +203,10 @@ export default function SignupPage() {
                 setRole(e.target.value)
                 if (errors.role) setErrors((prev) => ({ ...prev, role: undefined }))
               }}
-              className={`w-full h-12 rounded-lg border px-3 focus:ring-2 focus:ring-sky-200 focus:border-sky-500 ${
-                errors.role
-                  ? 'border-rose-400 bg-rose-50 text-rose-700'
+              className={`w-full h-12 rounded-lg border px-3 focus:ring-2 focus:ring-sky-200 focus:border-sky-500 ${errors.role
+                  ? ''
                   : 'border-slate-300 text-slate-800'
-              }`}
+                }`}
             >
               <option value="">-- Select a Role --</option>
               {VALID_ROLES.map((r) => (
@@ -235,11 +232,10 @@ export default function SignupPage() {
                   if (errors.password) setErrors((prev) => ({ ...prev, password: undefined }))
                 }}
                 placeholder="Enter your password"
-                className={`pr-10 h-12 rounded-lg border focus-visible:ring-2 focus-visible:ring-sky-200 focus-visible:border-sky-500 ${
-                  errors.password
-                    ? 'border-rose-400 bg-rose-50 text-rose-700 placeholder:text-rose-400'
+                className={`pr-10 h-12 rounded-lg border focus-visible:ring-2 focus-visible:ring-sky-200 focus-visible:border-sky-500 ${errors.password
+                    ? ''
                     : 'border-slate-300'
-                }`}
+                  }`}
               />
               <button
                 type="button"
@@ -267,11 +263,10 @@ export default function SignupPage() {
                   setErrors((prev) => ({ ...prev, confirmPassword: undefined }))
               }}
               placeholder="Re-enter your password"
-              className={`h-12 rounded-lg border focus-visible:ring-2 focus-visible:ring-sky-200 focus-visible:border-sky-500 ${
-                errors.confirmPassword
-                  ? 'border-rose-400 bg-rose-50 text-rose-700 placeholder:text-rose-400'
+              className={`h-12 rounded-lg border focus-visible:ring-2 focus-visible:ring-sky-200 focus-visible:border-sky-500 ${errors.confirmPassword
+                  ? ''
                   : 'border-slate-300'
-              }`}
+                }`}
             />
             {errors.confirmPassword && (
               <p className="mt-1 text-xs text-rose-600">{errors.confirmPassword}</p>

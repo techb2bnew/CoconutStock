@@ -34,6 +34,8 @@ export default function DriverManagementPage() {
   const [open, setOpen] = useState(false) // modal open
   const [saving, setSaving] = useState(false)
   const [editing, setEditing] = useState<Driver | null>(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 10
 
   // form state
   const [form, setForm] = useState({
@@ -51,6 +53,10 @@ export default function DriverManagementPage() {
   useEffect(() => {
     fetchDrivers()
   }, [])
+
+  const indexOfLastItem = currentPage * itemsPerPage
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage
+  const currentDrivers = drivers.slice(indexOfFirstItem, indexOfLastItem)
 
   async function fetchDrivers() {
     setLoading(true)
@@ -95,59 +101,59 @@ export default function DriverManagementPage() {
       vehicle_id: d.vehicle_id || '',
       zone: d.zone || '',
       // if stored with seconds, take first 5 chars for <input type=time>
-      shift_start: d.shift_start ? d.shift_start.slice(0,5) : '08:00',
-      shift_end: d.shift_end ? d.shift_end.slice(0,5) : '16:00',
+      shift_start: d.shift_start ? d.shift_start.slice(0, 5) : '08:00',
+      shift_end: d.shift_end ? d.shift_end.slice(0, 5) : '16:00',
       capacity: d.capacity ?? 1,
       status: d.status || 'Available',
     })
     setOpen(true)
   }
 
-async function handleSave(e?: React.SyntheticEvent) {
-  if (e) e.preventDefault()
+  async function handleSave(e?: React.SyntheticEvent) {
+    if (e) e.preventDefault()
 
-  // Validation: required fields
-  if (!form.driver_name.trim()) {
-    alert('Driver Name is required')
-    return
-  }
-
-  setSaving(true)
-  try {
-    const payload = {
-      driver_name: form.driver_name,
-      phone_number: form.phone_number || null,
-      email: form.email || null,
-      vehicle_id: form.vehicle_id || null,
-      zone: form.zone || null,
-      shift_start: form.shift_start?.length === 5 ? `${form.shift_start}:00` : form.shift_start,
-      shift_end: form.shift_end?.length === 5 ? `${form.shift_end}:00` : form.shift_end,
-      capacity: form.capacity ? Number(form.capacity) : null,
-      status: form.status || 'Available',
+    // Validation: required fields
+    if (!form.driver_name.trim()) {
+      alert('Driver Name is required')
+      return
     }
 
-    if (editing) {
-      const { error } = await supabase
-        .from('drivers')
-        .update(payload)
-        .eq('id', editing.id)
-      if (error) throw error
-    } else {
-      const { error } = await supabase
-        .from('drivers')
-        .insert([payload])
-      if (error) throw error
-    }
+    setSaving(true)
+    try {
+      const payload = {
+        driver_name: form.driver_name,
+        phone_number: form.phone_number || null,
+        email: form.email || null,
+        vehicle_id: form.vehicle_id || null,
+        zone: form.zone || null,
+        shift_start: form.shift_start?.length === 5 ? `${form.shift_start}:00` : form.shift_start,
+        shift_end: form.shift_end?.length === 5 ? `${form.shift_end}:00` : form.shift_end,
+        capacity: form.capacity ? Number(form.capacity) : null,
+        status: form.status || 'Available',
+      }
 
-    setOpen(false)
-    await fetchDrivers()
-  } catch (err) {
-    console.error('Save driver error:', err)
-    alert('Could not save driver. Check console for details.')
-  } finally {
-    setSaving(false)
+      if (editing) {
+        const { error } = await supabase
+          .from('drivers')
+          .update(payload)
+          .eq('id', editing.id)
+        if (error) throw error
+      } else {
+        const { error } = await supabase
+          .from('drivers')
+          .insert([payload])
+        if (error) throw error
+      }
+
+      setOpen(false)
+      await fetchDrivers()
+    } catch (err) {
+      console.error('Save driver error:', err)
+      alert('Could not save driver. Check console for details.')
+    } finally {
+      setSaving(false)
+    }
   }
-}
 
 
   async function handleDelete(id?: number) {
@@ -281,7 +287,7 @@ async function handleSave(e?: React.SyntheticEvent) {
           </select>
           <button
             onClick={openAddModal}
-            className="bg-sky-600 hover:bg-sky-700 text-white px-4 py-2 rounded-md text-sm font-medium shadow"
+            className="bg-[#00a1ff] hover:bg-[#0090e6] text-white px-4 py-2 rounded-md text-sm font-medium shadow"
           >
             + Add Driver
           </button>
@@ -307,7 +313,7 @@ async function handleSave(e?: React.SyntheticEvent) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {drivers.map((d) => (
+            {currentDrivers.map((d) => (
               <tr key={d.id} className="hover:bg-gray-50">
                 <td className="px-6 py-3">
                   <div className="font-medium text-gray-800">{d.driver_name}</div>
@@ -315,15 +321,14 @@ async function handleSave(e?: React.SyntheticEvent) {
                 </td>
                 <td className="px-6 py-3">
                   <span
-                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
-                      (d.status || '').toLowerCase() === 'available'
+                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${(d.status || '').toLowerCase() === 'available'
                         ? 'bg-green-100 text-green-700'
                         : (d.status || '').toLowerCase() === 'en route' || (d.status || '').toLowerCase() === 'enroute'
-                        ? 'bg-purple-100 text-purple-700'
-                        : (d.status || '').toLowerCase() === 'assigned'
-                        ? 'bg-sky-100 text-sky-700'
-                        : 'bg-gray-100 text-gray-600'
-                    }`}
+                          ? 'bg-purple-100 text-purple-700'
+                          : (d.status || '').toLowerCase() === 'assigned'
+                            ? 'bg-sky-100 text-sky-700'
+                            : 'bg-gray-100 text-gray-600'
+                      }`}
                   >
                     {d.status}
                   </span>
@@ -331,7 +336,7 @@ async function handleSave(e?: React.SyntheticEvent) {
                 <td className="px-6 py-3 text-gray-700">{d.vehicle_id}</td>
                 <td className="px-6 py-3 text-gray-700">{d.zone}</td>
                 <td className="px-6 py-3 text-gray-700">
-                  {d.shift_start ? d.shift_start.slice(0,5) : '—'} - {d.shift_end ? d.shift_end.slice(0,5) : '—'}
+                  {d.shift_start ? d.shift_start.slice(0, 5) : '—'} - {d.shift_end ? d.shift_end.slice(0, 5) : '—'}
                 </td>
                 <td className="px-6 py-3 text-gray-700">{d.capacity ?? '—'}</td>
                 <td className="px-6 py-3 text-right">
@@ -340,25 +345,57 @@ async function handleSave(e?: React.SyntheticEvent) {
                       onClick={() => openEditModal(d)}
                       className="text-sky-600 hover:underline text-sm font-medium inline-flex items-center gap-2"
                     >
-                      <Edit className="h-4 w-4" /> 
+                      <Edit className="h-4 w-4" />
                     </button>
                     <button
                       onClick={() => handleDelete(d.id)}
                       className="text-rose-600 hover:underline text-sm font-medium inline-flex items-center gap-2"
                     >
-                      <Trash2 className="h-4 w-4" /> 
+                      <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
                 </td>
               </tr>
             ))}
-            {drivers.length === 0 && !loading && (
+            {currentDrivers.length === 0 && !loading && (
               <tr>
                 <td colSpan={7} className="text-center p-6 text-sm text-gray-500">No drivers found.</td>
               </tr>
             )}
           </tbody>
+
         </table>
+        {/* Pagination Controls */}
+        {drivers.length > 0 && (
+          <div className="flex justify-between items-center px-6 py-4 border-t">
+            <p className="text-sm text-gray-600">
+              Showing {indexOfFirstItem + 1}–{Math.min(indexOfLastItem, drivers.length)} of {drivers.length}
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}
+                disabled={currentPage === 1}
+                className={`px-3 py-1.5 rounded-md border text-sm ${currentPage === 1
+                    ? 'text-gray-400 bg-gray-50 cursor-not-allowed'
+                    : 'text-gray-700 bg-white hover:bg-gray-100'
+                  }`}
+              >
+                Previous
+              </button>
+              <button
+                onClick={() => setCurrentPage((p) => (indexOfLastItem < drivers.length ? p + 1 : p))}
+                disabled={indexOfLastItem >= drivers.length}
+                className={`px-3 py-1.5 rounded-md border text-sm ${indexOfLastItem >= drivers.length
+                    ? 'text-gray-400 bg-gray-50 cursor-not-allowed'
+                    : 'text-gray-700 bg-white hover:bg-gray-100'
+                  }`}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
+
       </div>
 
       {/* Add / Edit Driver Modal (simple custom modal) */}
@@ -378,51 +415,51 @@ async function handleSave(e?: React.SyntheticEvent) {
             <form onSubmit={handleSave} className="grid grid-cols-1 gap-4 mt-4">
               <div>
                 <Label>Driver Name</Label>
-                <Input value={form.driver_name} onChange={(e) => setForm(prev => ({ ...prev, driver_name: e.target.value }))} placeholder="Driver full name" />
+                <Input value={form.driver_name} onChange={(e) => setForm(prev => ({ ...prev, driver_name: e.target.value }))} placeholder="Driver full name" className='bg-gray-100 border-gray-300' />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>Phone</Label>
-                  <Input value={form.phone_number} onChange={(e) => setForm(prev => ({ ...prev, phone_number: e.target.value }))} placeholder="+1 305-..." />
+                  <Input value={form.phone_number} onChange={(e) => setForm(prev => ({ ...prev, phone_number: e.target.value }))} placeholder="+1 305-..." className='bg-gray-100 border-gray-300' />
                 </div>
                 <div>
                   <Label>Email</Label>
-                  <Input value={form.email} onChange={(e) => setForm(prev => ({ ...prev, email: e.target.value }))} placeholder="email@example.com" />
+                  <Input value={form.email} onChange={(e) => setForm(prev => ({ ...prev, email: e.target.value }))} placeholder="email@example.com" className='bg-gray-100 border-gray-300' />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label>Vehicle ID</Label>
-                  <Input value={form.vehicle_id} onChange={(e) => setForm(prev => ({ ...prev, vehicle_id: e.target.value }))} placeholder="VAN-101" />
+                  <Input value={form.vehicle_id} onChange={(e) => setForm(prev => ({ ...prev, vehicle_id: e.target.value }))} placeholder="VAN-101" className='bg-gray-100 border-gray-300' />
                 </div>
                 <div>
                   <Label>Zone</Label>
-                  <Input value={form.zone} onChange={(e) => setForm(prev => ({ ...prev, zone: e.target.value }))} placeholder="Zone A - Miami Beach" />
+                  <Input value={form.zone} onChange={(e) => setForm(prev => ({ ...prev, zone: e.target.value }))} placeholder="Zone A - Miami Beach" className='bg-gray-100 border-gray-300' />
                 </div>
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
                   <Label>Shift Start</Label>
-                  <input type="time" value={form.shift_start} onChange={(e) => setForm(prev => ({ ...prev, shift_start: e.target.value }))} className="w-full mt-1 border border-gray-300 rounded-md p-2 text-sm" />
+                  <input type="time" value={form.shift_start} onChange={(e) => setForm(prev => ({ ...prev, shift_start: e.target.value }))} className="w-full mt-1 border border-gray-300 bg-gray-100 rounded-md p-2 text-sm" />
                 </div>
                 <div>
                   <Label>Shift End</Label>
-                  <input type="time" value={form.shift_end} onChange={(e) => setForm(prev => ({ ...prev, shift_end: e.target.value }))} className="w-full mt-1 border border-gray-300 rounded-md p-2 text-sm" />
+                  <input type="time" value={form.shift_end} onChange={(e) => setForm(prev => ({ ...prev, shift_end: e.target.value }))} className="w-full mt-1 border border-gray-300 bg-gray-100 rounded-md p-2 text-sm" />
                 </div>
                 <div>
                   <Label>Capacity</Label>
-                  <input type="number" min={1} value={form.capacity} onChange={(e) => setForm(prev => ({ ...prev, capacity: Number(e.target.value) }))} className="w-full mt-1 border border-gray-300 rounded-md p-2 text-sm" />
+                  <input type="number" min={1} value={form.capacity} onChange={(e) => setForm(prev => ({ ...prev, capacity: Number(e.target.value) }))} className="w-full mt-1 border border-gray-300 bg-gray-100 rounded-md p-2 text-sm" />
                 </div>
               </div>
 
-              <div>
+              <div >
                 <Label>Status</Label>
-                <Select value={form.status} onValueChange={(v) => setForm(prev => ({ ...prev, status: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
+                <Select value={form.status} onValueChange={(v) => setForm(prev => ({ ...prev, status: v }))} >
+                  <SelectTrigger className='bg-gray-50 border-gray-300'><SelectValue /></SelectTrigger>
+                  <SelectContent >
                     <SelectItem value="Available">Available</SelectItem>
                     <SelectItem value="En Route">En Route</SelectItem>
                     <SelectItem value="Assigned">Assigned</SelectItem>
