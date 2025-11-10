@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Users, Truck, ShoppingCart,
-  UsersRound, LogOut, Search,Receipt,FileText,Send
+  UsersRound, LogOut, Search, Receipt, FileText, Send, ChevronRight
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -21,7 +21,7 @@ const navItems = [
   { title: 'Staff', href: '/admin/staff', icon: UsersRound },
   { title: 'Delivery & Rules', href: '/admin/delivery-rules', icon: Truck },
   { title: 'Pricing & Discounts', href: '/admin/pricing-discounts', icon: Receipt },
-  { title: 'Invoices', href: '/admin/invoices', icon:FileText  },
+  { title: 'Invoices', href: '/admin/invoices', icon: FileText },
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
@@ -41,7 +41,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <aside className="w-64 bg-white border-r flex flex-col fixed left-0 top-0 h-full shadow-sm">
         {/* Logo Section */}
         <div className="flex items-center gap-4 mb-6 mt-4 p-5">
-          {/* Image */}
           <div className="flex items-center justify-center rounded-full ring-4 ring-sky-100 overflow-hidden bg-white">
             <Image
               src="/assests/logos/coconut.png"
@@ -51,8 +50,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
               className="object-contain p-2"
             />
           </div>
-
-          {/* Text */}
           <div className="flex flex-col justify-center">
             <p className="text-sky-500 font-semibold leading-tight">Coconut Admin</p>
             <p className="text-[12px] text-slate-500 leading-none">
@@ -69,13 +66,19 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             return (
               <Link key={item.title} href={item.href}>
                 <div
-                  className={`flex items-center gap-3 px-5 py-3 mx-2 rounded-md cursor-pointer transition-colors ${isActive
+                  className={`flex items-center justify-between px-5 py-3 mx-2 rounded-md cursor-pointer transition-colors 
+                    ${isActive
                       ? 'bg-sky-400 text-white'
                       : 'text-gray-700 hover:bg-blue-100 hover:text-sky-400'
                     }`}
                 >
-                  <Icon className="h-5 w-5" />
-                  <span className="font-medium text-sm">{item.title}</span>
+                  <div className="flex items-center gap-3">
+                    <Icon className="h-5 w-5" />
+                    <span className="font-medium text-sm">{item.title}</span>
+                  </div>
+
+                  {/* Right side arrow for active tab */}
+                  {isActive && <ChevronRight className="h-4 w-4 text-white" />}
                 </div>
               </Link>
             );
@@ -95,22 +98,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
       {/* Main Content */}
       <div className="flex-1 ml-64 flex flex-col min-h-screen">
-        {/* Header */}
-        {/* <header className="flex h-14 items-center justify-between gap-4 border-b bg-white px-6">
-          <form className="flex-1">
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
-              <Input
-                type="search"
-                placeholder="Search..."
-                className="w-full bg-gray-50 pl-8 border border-gray-200 shadow-none rounded-md max-w-sm"
-              />
-            </div>
-          </form>
-          <UserNav />
-        </header> */}
-
-        {/* Page Content */}
         <main className="flex-1 p-6 bg-gray-50">{children}</main>
       </div>
     </div>
