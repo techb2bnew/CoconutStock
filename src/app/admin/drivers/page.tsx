@@ -7,7 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
-import { CheckCircle, Truck, Send, Package, Clock, Edit, Trash2 } from 'lucide-react'
+import { CheckCircle, Truck, Send, Package, Clock, Edit, Trash2, Navigation } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -191,7 +191,7 @@ export default function DriverManagementPage() {
       </div>
 
       {/* Top Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      {/* <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         <Card className="border-none shadow-sm hover:shadow-md bg-white transition">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium text-gray-500">Total Drivers</CardTitle>
@@ -249,6 +249,77 @@ export default function DriverManagementPage() {
           </CardHeader>
           <CardContent>
             <div className="text-3xl font-semibold text-gray-800">{offDuty}</div>
+          </CardContent>
+        </Card>
+      </div> */}
+       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-white to-slate-50 hover:shadow-xl transition-all duration-300">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-wider text-slate-500 mb-2">Total Drivers</p>
+                <p className="text-3xl font-bold text-slate-900">{total}</p>
+              </div>
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-sky-500 to-blue-600 flex items-center justify-center shadow-lg">
+                <Truck className="w-7 h-7 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-green-50 to-emerald-50 hover:shadow-xl transition-all duration-300">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-wider text-green-700 mb-2">Available</p>
+                <p className="text-3xl font-bold text-green-700">{available}</p>
+              </div>
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center shadow-lg">
+                <CheckCircle className="w-7 h-7 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-purple-50 to-indigo-50 hover:shadow-xl transition-all duration-300">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-wider text-purple-700 mb-2">En Route</p>
+                <p className="text-3xl font-bold text-purple-700">{enroute}</p>
+              </div>
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-lg">
+                <Navigation className="w-7 h-7 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-blue-50 to-cyan-50 hover:shadow-xl transition-all duration-300">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-wider text-blue-700 mb-2">Assigned</p>
+                <p className="text-3xl font-bold text-blue-700">{assigned}</p>
+              </div>
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                <Package className="w-7 h-7 text-white" />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="border-0 shadow-lg bg-gradient-to-br from-slate-50 to-slate-100 hover:shadow-xl transition-all duration-300">
+          <CardContent className="pt-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs uppercase tracking-wider text-slate-600 mb-2">Off Duty</p>
+                <p className="text-3xl font-bold text-slate-700">{offDuty}</p>
+              </div>
+              <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-slate-500 to-slate-600 flex items-center justify-center shadow-lg">
+                <Clock className="w-7 h-7 text-white" />
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -398,6 +469,8 @@ export default function DriverManagementPage() {
 
       </div>
 
+      
+
       {/* Add / Edit Driver Modal (simple custom modal) */}
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
@@ -479,5 +552,10 @@ export default function DriverManagementPage() {
         </div>
       )}
     </div>
+
+
+
+
+
   )
 }

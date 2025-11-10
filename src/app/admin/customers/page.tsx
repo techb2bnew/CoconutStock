@@ -164,12 +164,21 @@ export default function CustomersPage() {
     }
 
     if (!error) {
-      setOpen(false)
-      resetForm()
-      fetchData()
-    } else {
-      console.error(error)
-    }
+  // Update local state without changing order
+  setCustomers((prev) =>
+    prev.map((c) =>
+      c.id === editCustomer?.id
+        ? { ...c, ...data } // update only this record
+        : c
+    )
+  )
+
+  setOpen(false)
+  resetForm()
+} else {
+  console.error(error)
+}
+
   }
 
   const handleEdit = (cust: Customer) => {

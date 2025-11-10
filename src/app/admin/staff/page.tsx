@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow
 } from '@/components/ui/table'
+import { Edit, Trash2 } from 'lucide-react'
 
 type Staff = {
   id: number
@@ -194,14 +195,14 @@ const currentStaff = filteredStaff.slice(indexOfFirstItem, indexOfLastItem)
           onClick={() => openModal(member)}
           className="text-sky-600 hover:underline"
         >
-          Edit
+          <Edit className="h-4 w-4" />
         </button>
-        <button className="text-sky-600 hover:underline">Reset Password</button>
+        {/* <button className="text-sky-600 hover:underline">Reset Password</button> */}
         <button
           onClick={() => handleDelete(member.id)}
           className="text-red-600 hover:underline"
         >
-          Delete
+          <Trash2 className="h-4 w-4" />
         </button>
       </TableCell>
     </TableRow>

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard, Users, Truck, ShoppingCart,
-  UsersRound, LogOut, Search
+  UsersRound, LogOut, Search,Receipt,FileText,Send
 } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
@@ -16,9 +16,12 @@ import Image from "next/image";
 const navItems = [
   { title: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
   { title: 'Customers', href: '/admin/customers', icon: Users },
-  { title: 'Drivers', href: '/admin/drivers', icon: Truck },
+  { title: 'Drivers', href: '/admin/drivers', icon: Send },
   { title: 'Orders', href: '/admin/orders', icon: ShoppingCart },
   { title: 'Staff', href: '/admin/staff', icon: UsersRound },
+  { title: 'Delivery & Rules', href: '/admin/delivery-rules', icon: Truck },
+  { title: 'Pricing & Discounts', href: '/admin/pricing-discounts', icon: Receipt },
+  { title: 'Invoices', href: '/admin/invoices', icon:FileText  },
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
